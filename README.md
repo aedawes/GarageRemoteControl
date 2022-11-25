@@ -1,6 +1,6 @@
 # HomeAssistant GarageSensor
 
-The main focus of this project is to run a Home Assistant application to be able to keep track of all of the devices within the garage that have been created so far (see Labs 1-4).  Home Assistant can be run on many different platforms such as Docker containers, Raspberry pi’s, and on top of other OS systems and can integrate different forms of communication from within the platform.  It is not only an easy method for communicating between devices, but allows the user to see the status of all devices on one platform.
+This Lab’s main focus is to create some sort of remote control of the garage system consisting of all of the devices within the garage that have been created so far (see Labs 1-5).  This lab will be using Apple’s Siri and Apple’s Homekit to connect the Home assistant set up to a mobile device that can be controlled through voice activation.
 
 ## Requirements
 - Use three Arduino Wemos D1 Mini’s
@@ -9,6 +9,7 @@ The main focus of this project is to run a Home Assistant application to be able
 - Use a breadboard and a magnetic sensor to create the third circuit
 - Run home assistant on any available platform
 - Connect the arduino’s to home assistant
+- Add some third party remote control device to make things easier than pressing a button
 - When the distance sensor senses something very close, the red light flashes
 - When the distance sensor senses something close, the red light turns on
 - When the distance sensor senses something at a medium distance, the yellow light turns on
@@ -19,7 +20,7 @@ The main focus of this project is to run a Home Assistant application to be able
 
 ## System View
 
-The user facing interface for this system is a physical stoplight (Figure 1) that is visible to the user, a distance sensor (Figure 2), and a magnet sensor (Figure 3), and the Home Assistant UI (Figure 4) to interact with.  The user will be able to move an object at varying distances from the sensor and be able to witness different colours of lights that will indicate how far away that object is. The user will also be able to connect and disconnect the magnet sensor to turn the light system on and off.  This is representative of a garage parking distance sensor.  As the user moves into the garage, the light will change based on distance sensor readings and the status of the garage door (magnet sensor).  A distant user will also be able to witness the status of all of the devices through the Home Assistant UI, allowing them to keep an eye on their garage.
+The user facing interface for this system is a physical stoplight (Figure 1) that is visible to the user, a distance sensor (Figure 2), and a magnet sensor (Figure 3), and the Home Assistant UI (Figure 4), and Apple’s IOS (Figure 5) to interact with. The user will be able to move an object at varying distances from the sensor and be able to witness different colours of lights that will indicate how far away that object is. The user will also be able to connect and disconnect the magnet sensor to turn the light system on and off.  This is representative of a garage parking distance sensor.  As the user moves into the garage, the light will change based on distance sensor readings and the status of the garage door (magnet sensor).  A distant user will also be able to witness the status of all of the devices through the Home Assistant UI, allowing them to keep an eye on their garage.
 
 <img width="75" alt="Screenshot 2022-11-15 at 3 31 17 PM" src="https://user-images.githubusercontent.com/59840208/202050496-bf03db21-bc30-4984-8541-a3ee4bc9b906.png">
 Figure 1
@@ -34,6 +35,8 @@ Figure 3
 Figure 4
 
 The User Interface on Home Assistant allows the user to see the exact distance an object is away from the sensor, whether or not the garage door is opened or closed, the status of the light used for parking and each individual LED on it, and to see whether the car is in the garage.  The system is set to change based on events from these entities, but the distant user has access to change certain components from this interface.
+
+Through Apple’s Siri and Homekit, these devices can be controlled even easier through touch and voice commands.  
 
 ## Component View
 
@@ -70,45 +73,28 @@ Figure 11 (Wemos D1 Mini replaced with Nano)
 
 To connect the devices to Home Assistant, the Home Assistant UI needed to be used.  The Arduino IDE did not need to be used at all with this lab as all functionality is done through Home Assistant.  
 
-There are multiple possible approaches for connecting all of the devices, but for this lab, esphome was used.  Esphome is added to Home Assistant as an “add on”.  In the settings tab, there is a choice for add ons and by navigating to that page and browsing the add on store, the esphome add on can be found.  After installing, the UI for esphome should be able to be viewed through a button on the esp home add on page (figure 12) and there is also an option to add to the side bar for easier access.
+There are multiple possible approaches for connecting all of the devices, but for this lab, esphome was used.  Details on how Esphome was set up and connected, see lab 5.  
 
-<img width="781" alt="Screenshot 2022-11-15 at 5 11 42 PM" src="https://user-images.githubusercontent.com/59840208/202051611-b717dd46-f311-456b-b18e-f068fc8fb968.png">
-Figure 12
+For this lab, more had to be added to Home Assistant.  In settings -> devices & services -> helpers, a new toggle helper was created to add a nice interface to turn the garage on(open)  and off (closed).  Then a few automations were tweaked to toggle this based on the magnet sensor’s state so the two could be linked.  
 
-<img width="777" alt="Screenshot 2022-11-15 at 5 12 02 PM" src="https://user-images.githubusercontent.com/59840208/202051646-5073167d-258f-4b7e-b8c7-fa41951537be.png">
-Figure 13
+To integrate Home Assistant with Apple’s Homekit so the device can be controlled through Siri, start by adding a new integration.  In Settings -> devices & services -> integrations, select “Add Integration” in the bottom corner.  Type in “Apple” and select the “Apple” option, and then search and select the “Homekit” option.  Configure preferences and press submit.  
 
-From the ESPHome panel (figure 13), there is an option in the bottom corner to add a new device.  After naming it and choosing the correct board, it will be added to the ESPHome page as seen above.  By pressing edit, there will be a yaml file (see appendix)  that is editable to configure the Arduinos.  The functionality of the Arduinos should not be coded here, only the set up.  Install the yaml using one of the four available methods and copy the encryption key here to add the device to Home Assistant.
+Next, head to the notifications tab in the side bar and there should be a QR code.  Download Homekit onto IOS device and press the + icon in the top right corner.  Select “Add Accessory” and scan the QR code on your web interface until it recognizes the device.
 
-After navigating to settings -> devices, there should be an option to configure the device added.  It will ask for the encryption key, and after, it may be added to the main dashboard for Home Assistant.
-
-The last piece is getting the different devices to talk to one another.  There is a section in settings titled “automations and scenes” and this is where the functionality will occur (figure 14).
-
-<img width="782" alt="Screenshot 2022-11-15 at 5 12 46 PM" src="https://user-images.githubusercontent.com/59840208/202051754-17e6d86b-478a-4a9c-88bd-4e65fa8aa53e.png">
-Figure 14
-
-Here, different automations can be created for each state of the system.  For example, Figure 15 shows the automation for turning on the green light at a reasonable distance.
-
-<img width="781" alt="Screenshot 2022-11-15 at 5 13 17 PM" src="https://user-images.githubusercontent.com/59840208/202051825-ff3e1c64-4ad1-45e5-82f0-69664fd2975c.png">
-Figure 15
-
-The trigger is when the distance of the distance sensor reads between 0.29m and 0.4m.  The condition is that is will only trigger if the magnet sensor/garage door  is open, and the actions turn on the green lights, and turn yellow and red off.
-
-Most of the automations are very similar to the previous example, but there is one notable difference.  The “way too close” automation needs a loop to flash the red LED.  The trigger and condition is the same, but for actions, the unneeded lights turn off and then the red turns on, waits 500ms, turns off, waits another 500ms, and then repeats until the distance for blinking light is no longer relevant.
-
-<img width="783" alt="Screenshot 2022-11-15 at 5 13 52 PM" src="https://user-images.githubusercontent.com/59840208/202051897-d50cd2ca-0c24-4516-922f-90f0a6022fe7.png">
-Figure 16
+The interface on the phone will then walk you through setting up the different devices.  It also includes automations.  Once set up, add whatever devices or automations needed in the home panel as easily accessible, and then asking Siri to control things using the correct names (“Hey Siri, turn off garage door”) will control the garage light device according to the automations created.
 
 ## Thought Questions
 
-1. Which version of Home Assistant did you choose to install? (Home Assistant Operating System, Home Assistant Container or one of the more experienced versions) Why did you choose this version?
+1. What services did you consider integrating into your project and why?
   - I used the Home Assistant OS installed on the raspberry pi.  Initially I was going to integrate my MQTT broker that was already installed on the pi, so I tried to get the docker container working.  I got it running, but there were many issues, one of which didn’t allow me to add any add ons to the UI which was needed for the labs.
-2. How should you decide which logic to perform in Home Assistant versus coding the logic directly into the devices? What guiding principles would you establish for future devices?
+2. What services would you like to integrate in the future?
   - I decided to do just about all of the coding on the home assistant.  Since I decided to use ESPHome instead of MQTT broker, the Home Assistant software could handle all the functionality in a much nicer way.  One example of this is the blinking light.  It is much easier to not have to worry about looping and have something else take care of it for me.
-3. What features do you like the most about Home Assistant?
+3. Consider internal and external security threats. Identify 3 likely attack vectors for someone to compromise this system? How did you mitigate these?
   - I like how easy it is to create functionality between devices.  It is very convenient to see everything remotely and to be able to control certain aspects from afar.  I also like having everything set out in front of me.  Much nicer user experience than the MQTT broker where all you can read is command line text.
-4. Please estimate the total time you spent on this lab and report
+4. What was the biggest challenge you overcame in this lab?
   - 7-8 hours
+5. Please estimate the total time you spent on this lab and report.
+  - 3-4 hours
 
 ## Verification
 
